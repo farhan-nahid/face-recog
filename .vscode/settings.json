@@ -1,0 +1,12 @@
+{ 
+  "eslist.enable": false,
+  "prettier.enable": false,
+  "biome.enabled": false,
+  "editor.defaultFormatter": "ms-python.autopep8",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.formatOnSave": true
+  },
+  "cSpell.words": ["datetimeconverter", "dotenv", "facerecog", "recog"],
+  "python-envs.pythonProjects": []
+}

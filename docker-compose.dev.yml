@@ -1,0 +1,68 @@
+services:
+  app:
+    container_name: "ak-aws-face-rec-service-dev"
+    image: "evidentbd/ak-aws-face-rec-service:dev"
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: runtime
+      labels:
+        - "com.evident.service=ak-aws-face-rec-service"
+        - "com.evident.environment=development"
+    volumes:
+      - ./src:/app:rw # Read-write for development
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - PYTHONDONTWRITEBYTECODE=1
+    command:
+      [
+        "uvicorn",
+        "main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+        "--log-level",
+        "debug",
+      ]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - face-recog-dev-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: "redis:7-alpine"
+    container_name: "ak-aws-face-rec-redis-dev"
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - face-recog-dev-network
+
+networks:
+  face-recog-dev-network:
+    driver: bridge
+    name: face-recog-dev
